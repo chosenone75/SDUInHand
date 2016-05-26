@@ -1,0 +1,102 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fitsSystemWindows="true">
+        <RelativeLayout
+            android:id="@+id/login_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_centerVertical="true"
+            android:gravity="center">
+            <FrameLayout
+                android:id="@+id/username_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="55dp"
+                android:gravity="center">
+
+                <EditText
+                    android:id="@+id/edt_username"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="5dp"
+                    android:inputType="number"
+                    android:maxLength="20"
+                    android:paddingLeft="55dp"
+                    android:paddingRight="60dp"
+                    android:hint="你的学号">
+
+                </EditText>
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="21dp"
+                    android:layout_gravity="left|center_vertical"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:visibility="visible"
+                    android:background="@drawable/ic_person_black_24dp"/>
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/usercode_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/username_layout"
+                android:layout_marginTop="6dp"
+                android:gravity="center">
+
+                <EditText
+                    android:id="@+id/edt_password"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:inputType="numberPassword"
+                    android:maxLength="20"
+                    android:paddingLeft="55dp"
+                    android:paddingRight="60dp"
+                    android:hint="选课密码">
+
+                </EditText>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="left|center_vertical"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginStart="7dp"
+                    android:background="@drawable/ic_no_encryption_black_24dp" />
+            </FrameLayout>
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/usercode_layout"
+                android:layout_marginTop="30dp"
+                android:background="#ff336699"
+                android:gravity="center"
+                android:text="登录"
+                android:textColor="@android:color/white" />
+        </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="9dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#00000000"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="SDU In Hand,Campus life easier."
+            android:textSize="16sp"
+            android:typeface="serif"
+            />
+    </RelativeLayout>
+</RelativeLayout>
