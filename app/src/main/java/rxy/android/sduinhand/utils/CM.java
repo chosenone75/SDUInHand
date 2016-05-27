@@ -1,6 +1,8 @@
 package rxy.android.sduinhand.utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.squareup.okhttp.Call;
@@ -39,6 +41,7 @@ public class CM {
     private static OkHttpClient bksClient = new OkHttpClient();
     private static OkHttpClient transferClient = new OkHttpClient();
 
+    private static String TransferKeyMap;
     public static void doLogin(String username, String password, final CMCallBack cmcb) {
         Headers.Builder hb = new Headers.Builder();
         hb.add("Content-Type", "application/x-www-form-urlencoded");
@@ -93,7 +96,6 @@ public class CM {
         transferClient.setConnectTimeout(8000, TimeUnit.MILLISECONDS);
         transferClient.setReadTimeout(8000,TimeUnit.MILLISECONDS);
         transferClient.setCookieHandler(new CookieManager(new PersistentCookieStore(cnt), CookiePolicy.ACCEPT_ALL));
-
         //第一种方法信任所有的证书
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null,new TrustManager[]{new X509TrustManager() {
@@ -164,7 +166,7 @@ public class CM {
         });
     }
 
-    public static void FetchNumberPad(final CMCallBack cmcb){
+    public static void FetchNumberPad(){
         Headers.Builder hb = new Headers.Builder();
         hb.add("User-Agent",
                 "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0");
@@ -173,11 +175,13 @@ public class CM {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                cmcb.onFail(request,e);
+                Log.e(TAG,"Failed when FetchNumberPad");
             }
             @Override
             public void onResponse(Response response) throws IOException {
-                cmcb.onSuccess(response);
+                Bitmap numberPad = BitmapFactory.decodeStream(response.body().byteStream());
+                TransferKeyMap = ImageSpliter.SpliteBitmap2Numbers(numberPad);
+                Log.e(TAG,TransferKeyMap);
             }
         });
     }
@@ -207,7 +211,7 @@ public class CM {
         hb.add("X-Requested-With",
                 "XMLHttpRequest");
         FormEncodingBuilder fb = new FormEncodingBuilder();
-        fb.add("pwd",passwd);
+        fb.add("pwd",CiperPwd(passwd));
         fb.add("bankno", bankno);
         fb.add("bankpwd","");
         fb.add("checkcode", checkcode);
@@ -229,6 +233,19 @@ public class CM {
                 cmcb.onSuccess(response);
             }
         });
+    }
+
+    /*
+    util function
+    used to convert the password to the real pwd that will be sent to the server
+     */
+    private static String CiperPwd(String pwd){
+        String result = "";
+        for (int i = pwd.length();i > 0;i--){
+            result += TransferKeyMap.indexOf(pwd.charAt(i));
+        }
+System.out.println(result);
+        return result;
     }
     public interface CMCallBack{
         public void onFail(Request request, IOException e);

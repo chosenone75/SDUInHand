@@ -22,16 +22,15 @@ import rxy.android.sduinhand.utils.CM;
 import rxy.android.sduinhand.utils.T;
 import rxy.android.sduinhand.utils.V;
 public class DoTransferActivity extends AppCompatActivity implements View.OnClickListener{
+
     private EditText edt_bankcard;
     private EditText edt_money;
     private EditText edt_checkcode;
     private EditText edt_passwd;
     private ImageView iv_checkcode;
-    private ImageView iv_number_pad;// only for test
     private Button btn_submit;
 
     //中间结果
-    private Bitmap numberPad;
     private Bitmap checkCode;
     private String dopay_result;
 
@@ -41,7 +40,6 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_do_transfer);
         initViews();
         initEvents();
-
         FetchTransHtml();
         FetchNumberPad();
         FetchCheckCode();
@@ -65,21 +63,10 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void FetchNumberPad() {
-       CM.FetchNumberPad(new CM.CMCallBack() {
-           @Override
-           public void onFail(Request request, IOException e) {
-                 handler.sendEmptyMessage(0x121);
-           }
-           @Override
-           public void onSuccess(Response response) {
-                  numberPad = BitmapFactory.decodeStream(response.body().byteStream());
-                  handler.sendEmptyMessage(0x122);
-           }
-       });
+       CM.FetchNumberPad();
     }
     private void initEvents() {
            iv_checkcode.setOnClickListener(this);
-           iv_number_pad.setOnClickListener(this);
            btn_submit.setOnClickListener(this);
     }
 
@@ -89,7 +76,6 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
         edt_checkcode = V.$(this,R.id.edt_checkcode_transfer);
         edt_passwd = V.$(this,R.id.edt_passwd);
         iv_checkcode = V.$(this,R.id.iv_checkcode_transfer);
-        iv_number_pad = V.$(this,R.id.iv_number_pad);
         btn_submit = V.$(this,R.id.btn_login_transfer);
     }
 
@@ -98,9 +84,6 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
         switch (v.getId()){
             case R.id.iv_checkcode_transfer:
                 FetchCheckCode();
-                break;
-            case R.id.iv_number_pad:
-                FetchNumberPad();
                 break;
             case R.id.btn_login_transfer:
                 DoPay();
@@ -114,7 +97,7 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
         String check_code = edt_checkcode.getText().toString();
         String amount = edt_money.getText().toString();
         if(isVaild(passwd)
-                &&isVaild(bankno)&&isVaild(check_code)&&isVaild(amount))
+                  &&isVaild(bankno)&&isVaild(check_code)&&isVaild(amount))
         CM.DoPay(passwd, bankno, amount, check_code, new CM.CMCallBack() {
             @Override
             public void onFail(Request request, IOException e) {
@@ -142,12 +125,6 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
-                case 0x121://numberpad failed
-                    break;
-                case 0x122://numberpad succeed
-                    iv_number_pad.setBackground(null);
-                    iv_number_pad.setImageBitmap(numberPad);
-                    break;
                 case 0x123://checkcode failed
                     break;
                 case 0x124://checkcode succeed
@@ -157,6 +134,8 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
                 case 0x125://dopay failed
                     break;
                 case 0x126://dopay succeed
+                    if(dopay_result.contains("false"))
+                       FetchNumberPad();
                     T.showShort(DoTransferActivity.this,dopay_result);
                     break;
             }
