@@ -12,6 +12,8 @@ public class Constant {
     public static final String CARD_CHECKCODE_URL = "https://card.sdu.edu.cn/Account/GetCheckCodeImg/Flag=123456";
     //card checkin
     public static final String CARD_CHECK_IN = "https://card.sdu.edu.cn/Account/MiniCheckIn";
+    public static final String CARD_SIGN_IN_CHECKCODE_URL = "https://card.sdu.edu.cn:8050/Account/GetCheckCodeImg?rad=25";
+    public static final String CARD_SIGN_IN_CHECK_IN = "https://card.sdu.edu.cn:8050/";
     public static final String CARD_DO_PAY = "https://card.sdu.edu.cn/CardManage/CardInfo/DoTransferPay";
     //转账提交网址
 

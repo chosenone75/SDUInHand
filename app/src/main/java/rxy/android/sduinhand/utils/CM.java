@@ -73,7 +73,8 @@ public class CM {
         Headers.Builder hb = new Headers.Builder();
         hb.add("User-Agent",
                 "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0");
-        final Request request = new Request.Builder().url(Constant.CARD_CHECKCODE_URL).headers(hb.build()).build();
+        hb.add("Referer","https://card.sdu.edu.cn:8050/");
+        final Request request = new Request.Builder().url(Constant.CARD_SIGN_IN_CHECKCODE_URL).headers(hb.build()).build();
         Call call = transferClient.newCall(request);
         call.enqueue(new Callback() {
             @Override
@@ -126,15 +127,16 @@ public class CM {
         Headers.Builder hb = new Headers.Builder();
         hb.add("User-Agent",
                 "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0");
-        hb.add("Referer", "https://card.sdu.edu.cn/");
+        hb.add("Referer","https://card.sdu.edu.cn:8050/");
         FormEncodingBuilder fb = new FormEncodingBuilder();
-        fb.add("checkcode", checkcode);
-        fb.add("password", passwd);
-        fb.add("signtype","SynSno");
+        fb.add("CheckCode", checkcode);
+        fb.add("Password", passwd);
+        fb.add("SignType","SynSno");
         fb.add("isUsedKeyPad","false");
-        fb.add("username",username);
+        fb.add("UserAccount",username);
+        fb.add("NextUrl","");
         final Request request = new Request.Builder()
-                .url(Constant.CARD_CHECK_IN).headers(hb.build()).post(fb.build()).build();
+                .url(Constant.CARD_SIGN_IN_CHECK_IN).headers(hb.build()).post(fb.build()).build();
         Call call = transferClient.newCall(request);
         call.enqueue(new Callback() {
             @Override
@@ -241,10 +243,9 @@ public class CM {
      */
     private static String CiperPwd(String pwd){
         String result = "";
-        for (int i = pwd.length() - 1;i > 0;i--){
+        for (int i = pwd.length() - 1;i >= 0;i--){
             result += TransferKeyMap.indexOf(pwd.charAt(i));
         }
-System.out.println(result);
         return result;
     }
     public interface CMCallBack{

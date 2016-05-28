@@ -115,7 +115,9 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                if(dopay_result.contains("true"))
                 handler.sendEmptyMessage(0x126);
+                else handler.sendEmptyMessage(0x125);
             }
         });
     }
@@ -136,14 +138,23 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
                     iv_checkcode.setImageBitmap(checkCode);
                     break;
                 case 0x125://dopay failed
+                    pd.cancel();
+                    FetchNumberPad();
+                    FetchCheckCode();
+                    T.show(DoTransferActivity.this,"啊哦~出了一点问题 请重试=。=", Toast.LENGTH_SHORT);
                     break;
                 case 0x126://dopay succeed
-                    if(dopay_result.contains("false"))
-                       FetchNumberPad();
                     pd.cancel();
-                    T.show(DoTransferActivity.this,dopay_result, Toast.LENGTH_SHORT);
+                    T.show(DoTransferActivity.this,"转账成功=。=", Toast.LENGTH_SHORT);
+                    clearInfo();
                     break;
             }
         }
     };
+
+    private void clearInfo() {
+        edt_checkcode.setText("");
+        edt_passwd.setText("");
+        edt_money.setText("");
+    }
 }

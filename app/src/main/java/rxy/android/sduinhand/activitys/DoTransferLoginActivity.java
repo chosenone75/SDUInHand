@@ -1,5 +1,6 @@
 package rxy.android.sduinhand.activitys;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,11 +26,16 @@ import rxy.android.sduinhand.utils.CM;
 import rxy.android.sduinhand.utils.T;
 import rxy.android.sduinhand.utils.V;
 public class DoTransferLoginActivity extends AppCompatActivity {
+
     private Button btn_submit = null;
     private ImageView iv_checkcode = null;
     private Bitmap checkcode = null;
     private EditText edt_checkcode = null;
     private EditText edt_passwd = null;
+
+    private String result = "";
+    private ProgressDialog pd;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +48,7 @@ public class DoTransferLoginActivity extends AppCompatActivity {
         btn_submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                    pd = ProgressDialog.show(DoTransferLoginActivity.this,"","---");
                     Login();
             }
         });
@@ -93,7 +100,7 @@ public class DoTransferLoginActivity extends AppCompatActivity {
            @Override
            public void onSuccess(Response response) {
                try {
-                   String result = response.body().string();
+                   result = response.body().string();
                    Log.e("TAG",result);
                    if(result.contains("success"))
                    handler.sendEmptyMessage(0x124);
@@ -106,6 +113,7 @@ public class DoTransferLoginActivity extends AppCompatActivity {
        });
        else{
            T.showShort(this,"不可为空");
+           pd.cancel();
        }
     }
     /*
@@ -124,13 +132,16 @@ public class DoTransferLoginActivity extends AppCompatActivity {
                     iv_checkcode.setImageBitmap(checkcode);
                     break;
                 case 0x124:
+                    pd.cancel();
                     T.show(DoTransferLoginActivity.this,"ok", Toast.LENGTH_SHORT);
                     Intent i = new Intent(DoTransferLoginActivity.this,DoTransferActivity.class);
                     startActivity(i);
                     finish();
                     break;
                 case 0x125:
-                    T.show(DoTransferLoginActivity.this,"gg", Toast.LENGTH_SHORT);
+                    pd.cancel();
+                    PreLogin();
+                    T.show(DoTransferLoginActivity.this,result, Toast.LENGTH_SHORT);
                     break;
             }
         }
