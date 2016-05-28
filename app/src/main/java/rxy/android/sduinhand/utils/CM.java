@@ -41,7 +41,7 @@ public class CM {
     private static OkHttpClient bksClient = new OkHttpClient();
     private static OkHttpClient transferClient = new OkHttpClient();
 
-    private static String TransferKeyMap;
+    private static String TransferKeyMap = "";
     public static void doLogin(String username, String password, final CMCallBack cmcb) {
         Headers.Builder hb = new Headers.Builder();
         hb.add("Content-Type", "application/x-www-form-urlencoded");
@@ -241,7 +241,7 @@ public class CM {
      */
     private static String CiperPwd(String pwd){
         String result = "";
-        for (int i = pwd.length();i > 0;i--){
+        for (int i = pwd.length() - 1;i > 0;i--){
             result += TransferKeyMap.indexOf(pwd.charAt(i));
         }
 System.out.println(result);

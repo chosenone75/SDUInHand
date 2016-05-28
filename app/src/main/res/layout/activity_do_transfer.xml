@@ -148,6 +148,6 @@
         android:layout_marginTop="30dp"
         android:background="#ff336699"
         android:gravity="center"
-        android:text="登录"
+        android:text="转账"
         android:textColor="@android:color/white" />
 </RelativeLayout>

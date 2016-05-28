@@ -1,5 +1,6 @@
 package rxy.android.sduinhand.activitys;
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -34,6 +36,7 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
     private Bitmap checkCode;
     private String dopay_result;
 
+    private ProgressDialog pd;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +89,7 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
                 FetchCheckCode();
                 break;
             case R.id.btn_login_transfer:
+                pd = ProgressDialog.show(DoTransferActivity.this,"","wait~");
                 DoPay();
                 break;
         }
@@ -101,7 +105,7 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
         CM.DoPay(passwd, bankno, amount, check_code, new CM.CMCallBack() {
             @Override
             public void onFail(Request request, IOException e) {
-                   handler.sendEmptyMessage(0x125);
+                handler.sendEmptyMessage(0x125);
             }
             @Override
             public void onSuccess(Response response) {
@@ -136,7 +140,8 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
                 case 0x126://dopay succeed
                     if(dopay_result.contains("false"))
                        FetchNumberPad();
-                    T.showShort(DoTransferActivity.this,dopay_result);
+                    pd.cancel();
+                    T.show(DoTransferActivity.this,dopay_result, Toast.LENGTH_SHORT);
                     break;
             }
         }

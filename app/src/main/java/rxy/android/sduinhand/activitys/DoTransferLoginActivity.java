@@ -20,6 +20,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 
 import rxy.android.sduinhand.R;
+import rxy.android.sduinhand.constants.Constant;
 import rxy.android.sduinhand.utils.CM;
 import rxy.android.sduinhand.utils.T;
 import rxy.android.sduinhand.utils.V;
@@ -55,6 +56,7 @@ public class DoTransferLoginActivity extends AppCompatActivity {
         btn_submit = V.$(this,R.id.btn_login_transfer);
         iv_checkcode = V.$(this,R.id.iv_checkcode);
         edt_checkcode = V.$(this,R.id.edt_checkcode);
+        edt_passwd = V.$(this,R.id.edt_pay_passwd);
     }
 
     public void PreLogin(){
@@ -74,9 +76,15 @@ public class DoTransferLoginActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
+    private boolean isVaild(String str) {
+        //此处后续可使用正则表达式处理
+        return !str.equals("");
+    }
     private void Login(){
-       CM.doTransferLogin("201300301187", "941005", edt_checkcode.getText().toString(), new CM.CMCallBack() {
+       String pwd = edt_passwd.getText().toString();
+       String checkcode = edt_checkcode.getText().toString();
+       if(isVaild(pwd) && isVaild(checkcode))
+       CM.doTransferLogin(Constant.username,pwd ,checkcode, new CM.CMCallBack() {
            @Override
            public void onFail(Request request, IOException e) {
                e.printStackTrace();
@@ -96,6 +104,9 @@ public class DoTransferLoginActivity extends AppCompatActivity {
                }
            }
        });
+       else{
+           T.showShort(this,"不可为空");
+       }
     }
     /*
     0x123 -> 验证码获取成功 0x121 -> 获取失败
