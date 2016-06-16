@@ -115,11 +115,13 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                if(dopay_result.contains("true"))
+                if(!dopay_result.contains("false"))
                 handler.sendEmptyMessage(0x126);
                 else handler.sendEmptyMessage(0x125);
             }
         });
+        else
+            pd.cancel();
     }
 
     private boolean isVaild(String str) {
@@ -151,7 +153,6 @@ public class DoTransferActivity extends AppCompatActivity implements View.OnClic
             }
         }
     };
-
     private void clearInfo() {
         edt_checkcode.setText("");
         edt_passwd.setText("");

@@ -42,8 +42,35 @@ public class DoTransferLoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_do_transfer_login);
         initViews();
         initEvents();
+
         PreLogin();
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex) {
+                Log.e("Here","Here");
+                ex.printStackTrace();
+            }
+        });
     }
+
+    private void FetchSignInSeesion() {
+        CM.FetchTransferSignInHtml(this, new CM.CMCallBack() {
+            @Override
+            public void onFail(Request request, IOException e) {
+            }
+
+            @Override
+            public void onSuccess(Response response) {
+                try {
+                    Log.e("DOTranFerLogin",response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private void initEvents() {
         btn_submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,9 +93,10 @@ public class DoTransferLoginActivity extends AppCompatActivity {
         edt_passwd = V.$(this,R.id.edt_pay_passwd);
     }
 
+
     public void PreLogin(){
-        try {
-            CM.doPreTransferLogin(this,new CM.CMCallBack() {
+            FetchSignInSeesion();
+            CM.doPreTransferLogin(new CM.CMCallBack() {
                 @Override
                 public void onFail(Request request, IOException e) {
                     handler.sendEmptyMessage(0x121);
@@ -79,9 +107,6 @@ public class DoTransferLoginActivity extends AppCompatActivity {
                     handler.sendEmptyMessage(0x123);
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
     private boolean isVaild(String str) {
         //此处后续可使用正则表达式处理

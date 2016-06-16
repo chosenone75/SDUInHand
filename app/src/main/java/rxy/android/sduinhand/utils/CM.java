@@ -68,12 +68,12 @@ public class CM {
         });
     }
 
-    public static void doPreTransferLogin(Context cnt,final CMCallBack cmcb) throws KeyManagementException, NoSuchAlgorithmException {
-        initClient4Https(cnt);
+    public static void doPreTransferLogin(final CMCallBack cmcb){
         Headers.Builder hb = new Headers.Builder();
         hb.add("User-Agent",
                 "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0");
         hb.add("Referer","https://card.sdu.edu.cn:8050/");
+        hb.add("Host","card.sdu.edu.cn:8050");
         final Request request = new Request.Builder().url(Constant.CARD_SIGN_IN_CHECKCODE_URL).headers(hb.build()).build();
         Call call = transferClient.newCall(request);
         call.enqueue(new Callback() {
@@ -97,7 +97,7 @@ public class CM {
         transferClient.setConnectTimeout(8000, TimeUnit.MILLISECONDS);
         transferClient.setReadTimeout(8000,TimeUnit.MILLISECONDS);
         transferClient.setCookieHandler(new CookieManager(new PersistentCookieStore(cnt), CookiePolicy.ACCEPT_ALL));
-        //第一种方法信任所有的证书
+        //第一种方法信任所有的证书 不安全的做法 存在中间人攻击MITM的可能
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null,new TrustManager[]{new X509TrustManager() {
             @Override
@@ -120,9 +120,37 @@ public class CM {
             }
         });
         //第二种方法保存对应的证书
+
+
         //待定
     }
 
+    public static void FetchTransferSignInHtml(Context cnt,final CMCallBack cmcb){
+        try {
+            initClient4Https(cnt);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+        Headers.Builder hb = new Headers.Builder();
+        hb.add("User-Agent",
+                "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0");
+        hb.add("Referer", "https://card.sdu.edu.cn/");
+        hb.add("Host","card.sdu.edu.cn:8050");
+        final Request request = new Request.Builder().url(Constant.CARD_SIGN_URL).headers(hb.build()).build();
+        Call call = transferClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                   cmcb.onFail(request,e);
+            }
+            @Override
+            public void onResponse(Response response) throws IOException {
+                cmcb.onSuccess(response);
+            }
+        });
+    }
     public static  void doTransferLogin(String username, String passwd, String checkcode, final CMCallBack cmcb){
         Headers.Builder hb = new Headers.Builder();
         hb.add("User-Agent",
