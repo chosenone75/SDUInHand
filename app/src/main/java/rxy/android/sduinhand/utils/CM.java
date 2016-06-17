@@ -14,20 +14,18 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 import rxy.android.sduinhand.constants.Constant;
 
@@ -42,6 +40,7 @@ public class CM {
     private static OkHttpClient transferClient = new OkHttpClient();
 
     private static String TransferKeyMap = "";
+
     public static void doLogin(String username, String password, final CMCallBack cmcb) {
         Headers.Builder hb = new Headers.Builder();
         hb.add("Content-Type", "application/x-www-form-urlencoded");
@@ -56,75 +55,100 @@ public class CM {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                  cmcb.onFail(request,e);
+                cmcb.onFail(request, e);
             }
+
             @Override
             public void onResponse(Response response) throws IOException {
-                 if(!response.body().string().contains("错误"))
-                  cmcb.onSuccess(response);
-                 else
-                  cmcb.onFail(null,null);
+                if (!response.body().string().contains("错误"))
+                    cmcb.onSuccess(response);
+                else
+                    cmcb.onFail(null, null);
             }
         });
     }
 
-    public static void doPreTransferLogin(final CMCallBack cmcb){
+    public static void doPreTransferLogin(final CMCallBack cmcb) {
         Headers.Builder hb = new Headers.Builder();
         hb.add("User-Agent",
                 "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0");
-        hb.add("Referer","https://card.sdu.edu.cn:8050/");
-        hb.add("Host","card.sdu.edu.cn:8050");
+        hb.add("Referer", "https://card.sdu.edu.cn:8050/");
+        hb.add("Host", "card.sdu.edu.cn:8050");
         final Request request = new Request.Builder().url(Constant.CARD_SIGN_IN_CHECKCODE_URL).headers(hb.build()).build();
         Call call = transferClient.newCall(request);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Log.e(TAG,"FAIL!\n"+e.getMessage());
-                cmcb.onFail(request,e);
+                Log.e(TAG, "FAIL!\n" + e.getMessage());
+                cmcb.onFail(request, e);
             }
+
             @Override
             public void onResponse(Response response) throws IOException {
-                Log.e(TAG,"SUCCEED!\n");
+                Log.e(TAG, "SUCCEED!\n");
                 cmcb.onSuccess(response);
             }
         });
     }
 
 
-
     private static void initClient4Https(Context cnt) throws NoSuchAlgorithmException, KeyManagementException {
+
         //初始化
         transferClient.setConnectTimeout(8000, TimeUnit.MILLISECONDS);
-        transferClient.setReadTimeout(8000,TimeUnit.MILLISECONDS);
+        transferClient.setReadTimeout(8000, TimeUnit.MILLISECONDS);
         transferClient.setCookieHandler(new CookieManager(new PersistentCookieStore(cnt), CookiePolicy.ACCEPT_ALL));
         //第一种方法信任所有的证书 不安全的做法 存在中间人攻击MITM的可能
-        SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null,new TrustManager[]{new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            }
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            }
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
-            }
-        }},new SecureRandom());
-
-        transferClient.setSslSocketFactory(sc.getSocketFactory());
-        transferClient.setHostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        });
+//        SSLContext sc = SSLContext.getInstance("SSL");
+//        sc.init(null,new TrustManager[]{new X509TrustManager() {
+//            @Override
+//            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+//            }
+//            @Override
+//            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+//            }
+//            @Override
+//            public X509Certificate[] getAcceptedIssuers() {
+//                return new X509Certificate[0];
+//            }
+//        }},new SecureRandom());
+//
+//        transferClient.setSslSocketFactory(sc.getSocketFactory());
+//        transferClient.setHostnameVerifier(new HostnameVerifier() {
+//            @Override
+//            public boolean verify(String hostname, SSLSession session) {
+//                return true;
+//            }
+//        });
         //第二种方法保存对应的证书
+        try {
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null);
+            int index = 0;
+            InputStream certificate = readCardCer(cnt);
+            keyStore.setCertificateEntry(index + "", certificateFactory.generateCertificate(certificate));
+            if(certificate != null)
+                certificate.close();
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(keyStore);
+            sslContext.init(null,trustManagerFactory.getTrustManagers(),new SecureRandom());
+            transferClient.setSslSocketFactory(sslContext.getSocketFactory());
 
-
-        //待定
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
+    private static InputStream readCardCer(Context cnt){
+        try {
+            return cnt.getAssets().open("card.cer");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public static void FetchTransferSignInHtml(Context cnt,final CMCallBack cmcb){
         try {
             initClient4Https(cnt);
